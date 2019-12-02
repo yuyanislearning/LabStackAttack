@@ -43,7 +43,8 @@ def ocr_core(filenames, search_term):
 
     pages, content, result, time = [], [], [], []
     for filename in filenames:
-        images = convert_from_path('RE__my_data/' + filename)
+        # RE__my_data not exist in github, use your own data
+        images = convert_from_path('../../RE__my_data/' + filename)
         t = find_time(images)
         for i in range(len(images)):
             # convert to grey scale 
