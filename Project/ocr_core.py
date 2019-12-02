@@ -16,6 +16,16 @@ from datetime import datetime
 import matplotlib.dates as mdates
 from PIL import ImageEnhance
 
+'''
+This code is for batch documents, change the corresponding filesnames.txt
+pass tern you want to search and it will automatically generate figures
+of the time series lab results, it will also print out the lines 
+when passing pre-defined search words, in this case, 'cbc'
+it will create a tsv files that search for labs that in cbc panel
+usage:
+python ocr_core.py $search_term
+'''
+
 #filename = sys.argv[1]
 search_term = sys.argv[1]
 filenames = []
@@ -28,7 +38,7 @@ def ocr_core(filenames, search_term):
     """
     This function will handle the core OCR processing of images."""
     if search_term == 'cbc':
-        cbc_search()
+        group_search('cbc')
         return None, None
 
     pages, content, result, time = [], [], [], []
@@ -63,17 +73,17 @@ def ocr_core(filenames, search_term):
     plt.savefig("test.png", dpi=480)
     return (pages, content)  
 
-def cbc_search():
+def group_search(search_term):
     '''search for cbc'''
-    search_terms = ['white blood cell count','red blood cell count', 'hemoglobin','hematocrit','platelet count, auto']
+    search_table = {'cbc':['white blood cell count','red blood cell count', 'hemoglobin','hematocrit','platelet count, auto']}
     # initialize
     d = {}
     time = []
-    for search_term in search_terms:
+    for search_term in search_table[search_term]:
         d[search_term] = []
     for filename in filenames:
         images = convert_from_path('RE__my_data/' + filename)
-        # finnd time
+        # find time
         t = find_time(images)
         time.append(t)
         for image in images:
@@ -87,11 +97,10 @@ def cbc_search():
                     d[search_term].append(r)
                     continue
                 
-
     # create table
     with open("test.tsv",'w') as fw:
         # header
-        for i in range(len(d['hemoglobin'])):
+        for i in range(len(d[d.keys()[0]])):
             fw.write("\t%s"%(str(time[i])))
         fw.write("\n")
         for search_term in search_terms:
@@ -106,7 +115,7 @@ def cbc_search():
 
 
 def get_content(text, search_term):
-    '''get the pages that the search term occur, content is the line that include search term
+    '''get the content, the line that include search term
     result is the test result of the search lab'''
     for line in text:
         if search_term in line:
